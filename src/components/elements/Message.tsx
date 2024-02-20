@@ -1,10 +1,14 @@
 import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
 type TMessageProps = {
-    type: 'incoming' | 'outgoing'
+    type: 'incoming' | 'outgoing',
+    children: ReactNode,
+    name: string,
+    time: string,
 }
 
-function Message({type}: TMessageProps) {
+function Message({type, children, name, time}: TMessageProps) {
     return (
         <div className={
             cn(
@@ -13,10 +17,10 @@ function Message({type}: TMessageProps) {
             )
         }>
             <div className="flex justify-between">
-                <div className="font-bold">Dave</div>
-                <div className="time">14:30:36</div>
+                <div className="font-bold">{name}</div>
+                <div className="time">{time}</div>
             </div>
-            <div className="bg-white text-black p-2 mt-2 rounded-md">Hello everyone!</div>
+            <div className="bg-white text-black p-2 mt-2 rounded-md">{children}</div>
         </div>
     )
 }

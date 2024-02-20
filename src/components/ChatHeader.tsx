@@ -24,11 +24,16 @@ function ChatHeader({ setChannel, setName }: TChatHeaderProps) {
 		) {
 			const name = inputNickRef.current.value;
 			const channel = inputChannelRef.current.value;
-			
+
+			if(name === 'ADMIN') {
+				alert('Name ADMIN is prohibited!');
+				return false;
+			}
+
 			setChannel(channel);
 			setName(name);
 
-			socket.emit('enterRoom', {
+			socket.emit('enterChannel', {
 				name,
 				channel
 			});

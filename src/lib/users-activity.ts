@@ -1,9 +1,10 @@
-import { TUser } from "./types";
+import { TMessage, TUser } from "./types";
 
 let users: TUser[] = [];
 
-export function sendMsg(name: string, text: string) {
+export function sendMsg(name: string, text: string): TMessage {
 	return {
+		id: crypto.randomUUID(),
 		name,
 		text,
 		time: new Intl.DateTimeFormat('default', {

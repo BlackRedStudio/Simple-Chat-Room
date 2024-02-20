@@ -16,7 +16,7 @@ export default function Home() {
 			<SocketContext.Provider value={socket}>
 				<h1 className="uppercase text-2xl mb-7 text-center">Chat room</h1>
 				<ChatHeader setChannel={setChannel} setName={setName} />
-				<ChatBody />
+				<ChatBody name={name} />
 				<ChatInfo />
 				<ChatTextarea channel={channel} name={name} />
 			</SocketContext.Provider>

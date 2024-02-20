@@ -3,3 +3,10 @@ export type TUser = {
     name: string,
     channel: string,
 }
+
+export type TMessage = {
+    id: string,
+    name: string,
+    text: string,
+    time: string,
+}
