@@ -1,6 +1,6 @@
 import http from 'http';
 import { Server } from 'socket.io';
-import { TUser } from './lib/types';
+import { activateUser, deactivateUser, getAllActiveChannels, getUser, getUsersInChannel, sendMsg } from './lib/users-activity';
 
 const server = http.createServer();
 
@@ -14,34 +14,76 @@ const io = new Server(server, {
 	},
 });
 
-const users: TUser[] = [];
-
 io.on('connection', socket => {
 
 	console.log(`User ${socket.id} connected!`);
 
-	socket.on('message', data => {
-		io.emit('message', `${socket.id.substring(0, 5)}: ${data}`);
+	socket.emit('info', 'Welcome to Chat App!');
+
+	socket.on('enterChannel', ({name, channel}) => {
+
+		const prevChannel = getUser(socket.id)?.channel;
+
+		if(prevChannel) {
+			socket.leave(prevChannel);
+			io.to(prevChannel).emit('info', `${name} has left the channel`);
+		}
+
+		const user = activateUser(socket.id, name, channel);
+
+		if(prevChannel) {
+			io.to(prevChannel).emit('userList', {
+				users: getUsersInChannel(prevChannel)
+			});
+		}
+
+		socket.join(user.channel);
+
+		socket.emit('info', `You have joined the ${user.channel} channel`)
+
+		socket.broadcast.to(user.channel).emit(`User ${user.name} has joined to channel`);
+
+		io.to(user.channel).emit('userList', {
+			users: getUsersInChannel(user.channel)
+		})
+
+		io.emit('channelList', {
+			channel: getAllActiveChannels()
+		});
 	});
 
+	socket.on('disconnect', () => {
+		
+		const user = getUser(socket.id);
+		deactivateUser(socket.id);
+
+		if(user) {
+			io.to(user.channel).emit('info', `${user.name} has left the channel`);
+
+			io.to(user.channel).emit('userList', {
+				users: getUsersInChannel(user.channel)
+			})
+
+			io.emit('channelList', {
+				channel: getAllActiveChannels()
+			});
+		}
+	})
+
+	socket.on('message', ({name, text}) => {
+		const channel = getUser(socket.id)?.channel;
+
+		if(channel) {
+			io.to(channel).emit('message', sendMsg(name, text))
+		}
+	})
+
+	socket.on('activity', ({name}) => {
+		const channel = getUser(socket.id)?.channel;
+
+		if(channel) {
+			socket.broadcast.to(channel).emit('activity', name);
+		}
+	})
+
 });
-
-function sendMsg(name: string, text: string) {
-	return {
-		name,
-		text,
-		time: new Intl.DateTimeFormat('default', {
-			hour: 'numeric',
-			minute: 'numeric',
-			second: 'numeric',
-		}).format(new Date()),
-	};
-}
-
-function activateUser(id: string, name: string, channel: string) {
-	const user = { id, name, channel };
-
-	if (users.filter(user => user.id !== id)) {
-		users.push(user);
-	}
-}
