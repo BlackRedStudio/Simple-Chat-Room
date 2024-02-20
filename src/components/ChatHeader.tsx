@@ -4,11 +4,10 @@ import Input from './elements/Input';
 import SocketContext from '@/lib/SocketContext';
 
 type TChatHeaderProps = {
-	setChannel: Dispatch<SetStateAction<string>>;
 	setName: Dispatch<SetStateAction<string>>;
 };
 
-function ChatHeader({ setChannel, setName }: TChatHeaderProps) {
+function ChatHeader({ setName }: TChatHeaderProps) {
 
 	const socket = useContext(SocketContext);
 
@@ -30,7 +29,6 @@ function ChatHeader({ setChannel, setName }: TChatHeaderProps) {
 				return false;
 			}
 
-			setChannel(channel);
 			setName(name);
 
 			socket.emit('enterChannel', {
