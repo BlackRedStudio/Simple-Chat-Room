@@ -1,4 +1,4 @@
-import { TMessage, TUser } from "./types";
+import { TMessage, TUser } from './types';
 
 let users: TUser[] = [];
 
@@ -18,8 +18,10 @@ export function sendMsg(name: string, text: string): TMessage {
 export function activateUser(id: string, name: string, channel: string) {
 	const user = { id, name, channel };
 
-	if (users.filter(user => user.id !== id)) {
+	if (!users.find(user => user.id === id || user.name === name)) {
 		users.push(user);
+	} else {
+		return null;
 	}
 
 	return user;

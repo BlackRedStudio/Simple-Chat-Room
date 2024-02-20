@@ -5,19 +5,14 @@ import Button from './elements/Button';
 import Textarea from './elements/Textarea';
 import SocketContext from '@/lib/SocketContext';
 
-type TChatTextareaProps = {
-    channel: string,
-    name: string,
-}
-
-function ChatTextarea({name}: TChatTextareaProps) {
+function ChatTextarea() {
 	const socket = useContext(SocketContext);
 
 	const [message, setMessage] = useState('');
 
     const handleTextarea = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setMessage(e.target.value);
-        socket.emit('activity', name);
+        socket.emit('activity', 'default');
     }
 
     const sendMsg = () => {
@@ -26,6 +21,7 @@ function ChatTextarea({name}: TChatTextareaProps) {
         } else {
             alert('Can\'t send a blank message.');
         }
+        setMessage('');
     }
 
 	return (

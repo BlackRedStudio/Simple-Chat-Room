@@ -24,36 +24,39 @@ const io = new Server(server, {
 io.on('connection', socket => {
 	console.log(`User ${socket.id} connected!`);
 
-	socket.emit('message', sendMsg('ADMIN', 'Welcome to Chat App!'));
-
 	socket.on('enterChannel', ({ name, channel }) => {
 		const prevChannel = getUser(socket.id)?.channel;
 
+		deactivateUser(socket.id);
+
 		if (prevChannel) {
 			socket.leave(prevChannel);
+
+			io.to(prevChannel).emit('userList', {
+				users: getUsersInChannel(prevChannel),
+			});
+
 			io.to(prevChannel).emit('message', sendMsg('ADMIN', `${name} has left the channel`));
 		}
 
 		const user = activateUser(socket.id, name, channel);
-
-		if (prevChannel) {
-			io.to(prevChannel).emit('userList', {
-				users: getUsersInChannel(prevChannel),
-			});
+		if(!user) {
+			socket.emit('error', 'Duplicated user name');
+			return false;
 		}
 
 		socket.join(user.channel);
 
 		socket.emit('message', sendMsg('ADMIN', `You have joined the ${user.channel} channel`));
 
-		socket.broadcast.to(user.channel).emit(`User ${user.name} has joined to channel`);
+		socket.broadcast.to(user.channel).emit('message', sendMsg('ADMIN', `User ${user.name} has joined to channel`));
 
 		io.to(user.channel).emit('userList', {
 			users: getUsersInChannel(user.channel),
 		});
 
 		io.emit('channelList', {
-			channel: getAllActiveChannels(),
+			channels: getAllActiveChannels(),
 		});
 	});
 
@@ -72,7 +75,7 @@ io.on('connection', socket => {
 			});
 
 			io.emit('channelList', {
-				channel: getAllActiveChannels(),
+				channels: getAllActiveChannels(),
 			});
 		}
 	});
@@ -85,11 +88,11 @@ io.on('connection', socket => {
 		}
 	});
 
-	socket.on('activity', ({ name }) => {
-		const channel = getUser(socket.id)?.channel;
+	socket.on('activity', name => {
+		const user = getUser(socket.id);
 
-		if (channel) {
-			socket.broadcast.to(channel).emit('activity', name);
+		if (user?.channel) {
+			socket.broadcast.to(user.channel).emit('activity', user.name);
 		}
 	});
 });
