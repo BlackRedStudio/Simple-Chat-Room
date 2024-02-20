@@ -13,7 +13,7 @@ function Message({type}: TMessageProps) {
             )
         }>
             <div className="flex justify-between">
-                <div className="text-bold">Dave</div>
+                <div className="font-bold">Dave</div>
                 <div className="time">14:30:36</div>
             </div>
             <div className="bg-white text-black p-2 mt-2 rounded-md">Hello everyone!</div>
